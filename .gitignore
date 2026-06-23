@@ -1,0 +1,52 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+build/
+
+# Entorno (¡NUNCA commitear!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Prisma
+prisma/dev.db
+prisma/test.db
+
+# Docker
+docker/volumes/
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts

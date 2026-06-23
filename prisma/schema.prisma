@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String    @id @default(uuid())
+  name      String
+  taxId     String    @unique
+  email     String
+  users     User[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  quotes    Quote[]
+  invoices  Invoice[]
+  clients   Client[]  // Relación añadida para cerrar el círculo con Client
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String?
+  role      String   @default("ADMIN")
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  cif       String?  
+  email     String?
+  phone     String?
+  address   String?
+  companyId String   
+  company   Company  @relation(fields: [companyId], references: [id]) // ¡Descomentado!
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+  invoices  Invoice[]
+}
+
+model Quote {
+  id        String      @id @default(cuid())
+  name      String      // Ej: "Instalación Eléctrica Chalet"
+  subtotal  Float       @default(0)
+  taxAmount Float       @default(0) // Dinero de IVA
+  total     Float       @default(0) // Total a pagar
+  status    String      @default("PENDING")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  clientId  String
+  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items     QuoteItem[] // Relación hacia los conceptos
+}
+
+// NUEVO: Modelo para las líneas del presupuesto
+model QuoteItem {
+  id        String   @id @default(cuid())
+  concept   String   // Ej: "Mano de obra", "Tubería PVC"
+  quantity  Float    @default(1)
+  price     Float    // Precio por unidad
+  taxRate   Float    @default(21) // Porcentaje de IVA aplicable
+  
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  number    String        @unique // Ej: FAC-2026-001
+  subtotal  Float         @default(0)
+  taxAmount Float         @default(0)
+  total     Float         @default(0)
+  status    String        @default("UNPAID")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  clientId  String
+  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items     InvoiceItem[] // Relación hacia los conceptos
+}
+
+// NUEVO: Modelo para las líneas de la factura
+model InvoiceItem {
+  id        String   @id @default(cuid())
+  concept   String   
+  quantity  Float    @default(1)
+  price     Float    
+  taxRate   Float    @default(21) 
+  
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
