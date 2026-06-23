@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig: any = {
   eslint: {
     // Esto apaga el inspector de código estricto en Vercel
     ignoreDuringBuilds: true,
