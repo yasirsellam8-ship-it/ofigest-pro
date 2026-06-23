@@ -67,7 +67,7 @@ export class ValidationError extends DomainError {
     this.details = details;
   }
 
-  toJSON() {
+  override toJSON() {
     return {
       ...super.toJSON(),
       details: this.details,
