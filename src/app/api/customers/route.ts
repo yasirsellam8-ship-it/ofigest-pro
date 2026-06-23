@@ -11,6 +11,19 @@ export async function POST(request: Request) {
 
     if (!name) return NextResponse.json({ error: 'El nombre es obligatorio' }, { status: 400 });
 
+    // 👇 LA MAGIA: Le decimos a la BBDD que cree la empresa si no existe
+    await prisma.company.upsert({
+      where: { id: 'mi-empresa-123' },
+      update: {}, // Si ya existe, no hace nada
+      create: {
+        id: 'mi-empresa-123',
+        name: 'Instalaciones de Prueba',
+        taxId: 'B00000000', // Obligatorio según tu schema
+        email: 'admin@prueba.com'
+      }
+    });
+
+    // Ahora sí, guardamos al cliente atándolo a la empresa que ya existe
     const newClient = await prisma.client.create({
       data: {
         name,
@@ -23,6 +36,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newClient, { status: 201 });
   } catch (error: any) {
+    console.error("🔥 EL ERROR REAL DE LA BBDD ES:", error);
     return NextResponse.json({ error: 'Error al crear', detalle: error.message }, { status: 500 });
   }
 }

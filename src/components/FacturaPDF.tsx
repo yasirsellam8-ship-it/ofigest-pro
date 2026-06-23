@@ -1,13 +1,14 @@
 import { forwardRef } from "react";
 
-// Este componente es el "folio A4" invisible que se convertirá en PDF
 export const FacturaPDF = forwardRef<HTMLDivElement, { factura: any }>(({ factura }, ref) => {
   if (!factura) return null;
 
   return (
-    <div className="hidden">
-      {/* Todo lo que esté dentro de este div es lo que se imprime */}
-      <div ref={ref} className="p-12 bg-white text-slate-800 w-[210mm] min-h-[297mm] mx-auto text-sm">
+    // 🔥 EL ARREGLO: En la web es invisible ("hidden"), pero al imprimir se pone encima de TODO tapando el menú ("print:block print:absolute...")
+    <div className="hidden print:block print:absolute print:top-0 print:left-0 print:w-full print:min-h-screen print:bg-white print:z-[99999] print:m-0">
+      
+      {/* El folio A4 */}
+      <div ref={ref} className="p-8 bg-white text-slate-800 max-w-[210mm] mx-auto text-sm">
         
         {/* Cabecera: Tu Empresa y Datos de Factura */}
         <div className="flex justify-between items-start border-b-2 border-slate-200 pb-8 mb-8">
