@@ -17,7 +17,7 @@ export class LoginUseCase {
     }
 
     // 2. Comprobamos la contraseña con Argon2
-    const isPasswordValid = await this.hashService.compare(password, user.password);
+    const isPasswordValid = await this.hashService.compare(password, user.password as string);
     
     if (!isPasswordValid) {
       throw new Error('Credenciales incorrectas');
