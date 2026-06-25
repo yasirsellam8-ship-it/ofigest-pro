@@ -51,7 +51,6 @@ export default function PresupuestosPage() {
     if (res.ok) cargarPresupuestos();
   };
 
-  // NUEVA FUNCIÓN PARA BORRAR PRESUPUESTO
   const borrarPresupuesto = async (id: string) => {
     if (!window.confirm("¿Seguro que quieres borrar este presupuesto? Esta acción no se puede deshacer.")) return;
 
@@ -60,7 +59,7 @@ export default function PresupuestosPage() {
     });
 
     if (res.ok) {
-      cargarPresupuestos(); // Recarga la tabla al momento
+      cargarPresupuestos();
     } else {
       alert("Error al borrar el presupuesto");
     }
@@ -117,59 +116,78 @@ export default function PresupuestosPage() {
 
   return (
     <>
-      <div className="space-y-6 print:hidden">
+      {/* 🔥 EL FONDO GRIS: Envuelve toda la página en gris suave para dar contraste */}
+      <div className="space-y-6 print:hidden min-h-[85vh] bg-slate-50 p-6 md:p-8 rounded-2xl">
+        
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-slate-800">Presupuestos</h2>
-          <button onClick={abrirNuevoPresupuesto} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+          <button onClick={abrirNuevoPresupuesto} className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md">
             + Nuevo Presupuesto
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+        {/* 🔥 LA CAJA FLOTANTE: Fondo blanco, bordes redondeados XL, borde fino y sombra */}
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
           <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 text-slate-800">
+            {/* 🔥 LAS CABECERAS: Premium SaaS style (mayúsculas, separadas, gris medio) */}
+            <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
               <tr>
-                <th className="p-4 font-semibold">Título</th>
-                <th className="p-4 font-semibold">Cliente</th>
-                <th className="p-4 font-semibold text-right">Total</th>
-                <th className="p-4 font-semibold text-center">Estado</th>
-                <th className="p-4 font-semibold text-right">Acciones</th>
+                <th className="p-4">Título</th>
+                <th className="p-4">Cliente</th>
+                <th className="p-4 text-right">Total</th>
+                <th className="p-4 text-center">Estado</th>
+                <th className="p-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {presupuestos.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-slate-400">No hay presupuestos creados.</td></tr>
+                <tr>
+                  <td colSpan={5} className="py-24 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                      <div className="bg-blue-50 p-5 rounded-full shadow-inner mb-2">
+                        <svg className="w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-800">Aún no tienes presupuestos</h3>
+                        <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                          Crea tu primer presupuesto haciendo clic en el botón superior para empezar a enviarlo a tus clientes.
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
               ) : (
-                presupuestos.map((presu, i) => (
-                  <tr key={i} className="transition hover:bg-slate-50">
+                presupuestos.map((presu: any, i: number) => (
+                  <tr key={i} className="transition-colors hover:bg-slate-50/80">
                     <td className="p-4 font-medium text-slate-800">{presu.name}</td>
-                    <td className="p-4">{presu.client?.name || "Desconocido"}</td>
-                    <td className="p-4 text-right font-semibold text-slate-700">{(presu.total || 0).toFixed(2)} €</td>
+                    <td className="p-4 text-slate-600">{presu.client?.name || "Desconocido"}</td>
+                    <td className="p-4 text-right font-bold text-slate-800">{(presu.total || 0).toFixed(2)} €</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        presu.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' : 
-                        presu.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 
-                        'bg-yellow-100 text-yellow-800'
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border ${
+                        presu.status === 'ACCEPTED' ? 'bg-green-50 text-green-700 border-green-200' : 
+                        presu.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' : 
+                        'bg-yellow-50 text-yellow-700 border-yellow-200'
                       }`}>
                         {presu.status === 'PENDING' ? 'Pendiente' : presu.status === 'ACCEPTED' ? 'Aceptado' : 'Rechazado'}
                       </span>
                     </td>
-                    <td className="p-4 text-right space-x-3">
+                    <td className="p-4 text-right space-x-4">
                       {presu.status === 'PENDING' ? (
                         <>
-                          <button onClick={() => cambiarEstado(presu.id, 'ACCEPTED')} className="text-xs text-green-600 hover:underline">Aceptar</button>
-                          <button onClick={() => cambiarEstado(presu.id, 'REJECTED')} className="text-xs text-red-600 hover:underline">Rechazar</button>
+                          <button onClick={() => cambiarEstado(presu.id, 'ACCEPTED')} className="text-sm font-medium text-green-600 hover:text-green-800 transition-colors">Aceptar</button>
+                          <button onClick={() => cambiarEstado(presu.id, 'REJECTED')} className="text-sm font-medium text-red-500 hover:text-red-700 transition-colors">Rechazar</button>
                         </>
                       ) : (
-                        <button onClick={() => cambiarEstado(presu.id, 'PENDING')} className="text-xs text-slate-400 hover:underline">Restablecer</button>
+                        <button onClick={() => cambiarEstado(presu.id, 'PENDING')} className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors">Restablecer</button>
                       )}
                       
-                      <button onClick={() => generarPDF(presu)} className="text-sm font-medium text-blue-600 hover:text-blue-800 border-l pl-3 border-slate-200">
+                      <button onClick={() => generarPDF(presu)} className="text-sm font-bold text-blue-600 hover:text-blue-800 border-l pl-4 border-slate-200 transition-colors">
                         📄 PDF
                       </button>
 
-                      {/* BOTÓN DE BORRAR */}
-                      <button onClick={() => borrarPresupuesto(presu.id)} className="text-sm font-medium text-red-500 hover:text-red-700 border-l pl-3 border-slate-200" title="Borrar presupuesto">
+                      <button onClick={() => borrarPresupuesto(presu.id)} className="text-sm font-bold text-slate-400 hover:text-red-600 border-l pl-4 border-slate-200 transition-colors" title="Borrar presupuesto">
                         🗑️
                       </button>
                     </td>
@@ -180,61 +198,62 @@ export default function PresupuestosPage() {
           </table>
         </div>
 
+        {/* MODAL MANTENIDO IGUAL */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
-              <div className="mb-6 flex items-center justify-between border-b pb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-2xl">
+              <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
                 <h3 className="text-xl font-bold text-slate-800">Crear Presupuesto</h3>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 text-xl font-bold">✕</button>
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-xl font-bold">✕</button>
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Título de la obra / proyecto *</label>
-                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-md border p-2 text-sm" />
+                    <label className="mb-1.5 block text-sm font-semibold text-slate-700">Título del proyecto *</label>
+                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: Reforma cocina" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Cliente *</label>
-                    <select required value={clientId} onChange={(e) => setClientId(e.target.value)} className="w-full rounded-md border p-2 text-sm bg-white">
+                    <label className="mb-1.5 block text-sm font-semibold text-slate-700">Cliente *</label>
+                    <select required value={clientId} onChange={(e) => setClientId(e.target.value)} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
                       <option value="">-- Selecciona un cliente --</option>
                       {clientes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
                 </div>
 
-                <div className="mt-8 border-t pt-6">
+                <div className="mt-8 border-t border-slate-100 pt-6">
                   <div className="flex justify-between items-center mb-4">
                     <h4 className="font-bold text-slate-800">Líneas de concepto</h4>
-                    <button type="button" onClick={agregarLinea} className="text-sm text-blue-600 font-semibold">+ Añadir línea</button>
+                    <button type="button" onClick={agregarLinea} className="text-sm text-blue-600 font-bold hover:text-blue-800 transition-colors">+ Añadir línea</button>
                   </div>
 
                   <div className="space-y-3">
                     {items.map((item, index) => (
-                      <div key={index} className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <input type="text" placeholder="Concepto" required value={item.concept} onChange={(e) => actualizarLinea(index, 'concept', e.target.value)} className="flex-1 rounded border p-2 text-sm" />
-                        <input type="number" min="0.1" step="0.1" required value={item.quantity} onChange={(e) => actualizarLinea(index, 'quantity', parseFloat(e.target.value) || 0)} className="w-24 rounded border p-2 text-sm" />
-                        <input type="number" min="0" step="0.01" required value={item.price} onChange={(e) => actualizarLinea(index, 'price', parseFloat(e.target.value) || 0)} className="w-32 rounded border p-2 text-sm" />
-                        <select value={item.taxRate} onChange={(e) => actualizarLinea(index, 'taxRate', parseFloat(e.target.value))} className="w-24 rounded border p-2 text-sm bg-white">
+                      <div key={index} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <input type="text" placeholder="Concepto del trabajo" required value={item.concept} onChange={(e) => actualizarLinea(index, 'concept', e.target.value)} className="flex-1 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" />
+                        <input type="number" min="0.1" step="0.1" required value={item.quantity} onChange={(e) => actualizarLinea(index, 'quantity', parseFloat(e.target.value) || 0)} className="w-24 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Cantidad" />
+                        <input type="number" min="0" step="0.01" required value={item.price} onChange={(e) => actualizarLinea(index, 'price', parseFloat(e.target.value) || 0)} className="w-32 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Precio Ud." />
+                        <select value={item.taxRate} onChange={(e) => actualizarLinea(index, 'taxRate', parseFloat(e.target.value))} className="w-24 rounded-lg border border-slate-300 p-2 text-sm bg-white focus:border-blue-500 outline-none">
                           <option value="21">21% IVA</option><option value="10">10% IVA</option><option value="0">0% IVA</option>
                         </select>
-                        {items.length > 1 && <button type="button" onClick={() => quitarLinea(index)} className="text-red-500 font-bold px-2">✕</button>}
+                        {items.length > 1 && <button type="button" onClick={() => quitarLinea(index)} className="text-red-400 hover:text-red-600 font-bold px-2 transition-colors">✕</button>}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex justify-end border-t pt-4">
-                  <div className="w-64 space-y-2 text-sm">
-                    <div className="flex justify-between text-slate-600"><span>Base Imponible:</span><span>{subtotal.toFixed(2)} €</span></div>
-                    <div className="flex justify-between text-slate-600"><span>Impuestos (IVA):</span><span>{taxAmount.toFixed(2)} €</span></div>
-                    <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2"><span>TOTAL:</span><span>{total.toFixed(2)} €</span></div>
+                <div className="flex justify-end border-t border-slate-100 pt-6">
+                  <div className="w-72 space-y-3 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="flex justify-between text-slate-600"><span>Base Imponible:</span><span className="font-medium">{subtotal.toFixed(2)} €</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Impuestos (IVA):</span><span className="font-medium">{taxAmount.toFixed(2)} €</span></div>
+                    <div className="flex justify-between text-lg font-black text-slate-800 border-t border-slate-200 pt-3 mt-1"><span>TOTAL:</span><span>{total.toFixed(2)} €</span></div>
                   </div>
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600">Cancelar</button>
-                  <button type="submit" className="rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700">Guardar Presupuesto</button>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Cancelar</button>
+                  <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all">Guardar Presupuesto</button>
                 </div>
               </form>
             </div>
