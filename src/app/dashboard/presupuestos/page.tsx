@@ -9,11 +9,18 @@ export default function PresupuestosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [presupuestoActivoParaPDF, setPresupuestoActivoParaPDF] = useState<any>(null);
 
-  // EL MOTOR DE IMPRESIÓN
+  // 🔥 EL MOTOR DE IMPRESIÓN (AHORA CAMBIA EL NOMBRE DEL PDF)
   useEffect(() => {
     if (presupuestoActivoParaPDF) {
+      // Guardamos el título original y lo cambiamos por el nombre del proyecto
+      const tituloOriginal = document.title;
+      const nombreLimpio = presupuestoActivoParaPDF.name.replace(/\s+/g, '_');
+      document.title = `Presupuesto_${nombreLimpio}`;
+
       setTimeout(() => {
         window.print();
+        // Restauramos el título original de la web al terminar
+        document.title = tituloOriginal;
         setPresupuestoActivoParaPDF(null);
       }, 100);
     }
@@ -116,23 +123,20 @@ export default function PresupuestosPage() {
 
   return (
     <>
-      {/* 🔥 EL FONDO GRIS: Envuelve toda la página en gris suave para dar contraste */}
-      <div className="space-y-6 print:hidden min-h-[85vh] bg-slate-50 p-6 md:p-8 rounded-2xl">
+      <div className="print:hidden min-h-[85vh] bg-slate-50 p-6 md:p-8 rounded-2xl">
         
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-slate-800">Presupuestos</h2>
-          <button onClick={abrirNuevoPresupuesto} className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-slate-800">Gestión de Presupuestos</h2>
+          <button onClick={abrirNuevoPresupuesto} className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md">
             + Nuevo Presupuesto
           </button>
         </div>
 
-        {/* 🔥 LA CAJA FLOTANTE: Fondo blanco, bordes redondeados XL, borde fino y sombra */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
           <table className="w-full text-left text-sm text-slate-600">
-            {/* 🔥 LAS CABECERAS: Premium SaaS style (mayúsculas, separadas, gris medio) */}
             <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
               <tr>
-                <th className="p-4">Título</th>
+                <th className="p-4">Título del Proyecto</th>
                 <th className="p-4">Cliente</th>
                 <th className="p-4 text-right">Total</th>
                 <th className="p-4 text-center">Estado</th>
@@ -165,7 +169,7 @@ export default function PresupuestosPage() {
                     <td className="p-4 text-slate-600">{presu.client?.name || "Desconocido"}</td>
                     <td className="p-4 text-right font-bold text-slate-800">{(presu.total || 0).toFixed(2)} €</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border ${
+                      <span className={`px-2.5 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide border ${
                         presu.status === 'ACCEPTED' ? 'bg-green-50 text-green-700 border-green-200' : 
                         presu.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' : 
                         'bg-yellow-50 text-yellow-700 border-yellow-200'
@@ -176,11 +180,11 @@ export default function PresupuestosPage() {
                     <td className="p-4 text-right space-x-4">
                       {presu.status === 'PENDING' ? (
                         <>
-                          <button onClick={() => cambiarEstado(presu.id, 'ACCEPTED')} className="text-sm font-medium text-green-600 hover:text-green-800 transition-colors">Aceptar</button>
-                          <button onClick={() => cambiarEstado(presu.id, 'REJECTED')} className="text-sm font-medium text-red-500 hover:text-red-700 transition-colors">Rechazar</button>
+                          <button onClick={() => cambiarEstado(presu.id, 'ACCEPTED')} className="text-sm font-bold text-green-600 hover:text-green-800 transition-colors">Aceptar</button>
+                          <button onClick={() => cambiarEstado(presu.id, 'REJECTED')} className="text-sm font-bold text-red-500 hover:text-red-700 transition-colors">Rechazar</button>
                         </>
                       ) : (
-                        <button onClick={() => cambiarEstado(presu.id, 'PENDING')} className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors">Restablecer</button>
+                        <button onClick={() => cambiarEstado(presu.id, 'PENDING')} className="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">Restablecer</button>
                       )}
                       
                       <button onClick={() => generarPDF(presu)} className="text-sm font-bold text-blue-600 hover:text-blue-800 border-l pl-4 border-slate-200 transition-colors">
@@ -198,7 +202,6 @@ export default function PresupuestosPage() {
           </table>
         </div>
 
-        {/* MODAL MANTENIDO IGUAL */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-2xl">
@@ -251,7 +254,7 @@ export default function PresupuestosPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3">
+                <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Cancelar</button>
                   <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all">Guardar Presupuesto</button>
                 </div>

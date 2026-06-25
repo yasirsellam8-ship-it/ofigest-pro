@@ -6,7 +6,6 @@ export default function ClientesPage() {
   const [clientes, setClientes] = useState<any[]>([]); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Guardamos el ID si estamos editando a alguien. Si es null, es un cliente nuevo.
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
@@ -26,14 +25,12 @@ export default function ClientesPage() {
     cargarClientes();
   }, []);
 
-  // Función al pulsar "+ Nuevo Cliente" (Limpia todo)
   const abrirNuevoCliente = () => {
     setEditingId(null);
     setName(""); setCif(""); setPhone(""); setEmail("");
     setIsModalOpen(true);
   };
 
-  // Función al pulsar "Editar" en la tabla (Rellena los datos)
   const abrirEditarCliente = (cliente: any) => {
     setEditingId(cliente.id);
     setName(cliente.name);
@@ -43,14 +40,13 @@ export default function ClientesPage() {
     setIsModalOpen(true);
   };
 
-  // Función para guardar (Sirve para Crear y para Editar)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const metodo = editingId ? "PUT" : "POST";
     const datosEnvio = editingId 
-      ? { id: editingId, name, cif, phone, email } // Si editamos, enviamos el ID
-      : { name, cif, phone, email };               // Si creamos, no hay ID aún
+      ? { id: editingId, name, cif, phone, email }
+      : { name, cif, phone, email };
 
     const res = await fetch("/api/customers", {
       method: metodo,
@@ -61,13 +57,11 @@ export default function ClientesPage() {
     if (res.ok) {
       setIsModalOpen(false);
       cargarClientes(); 
-      alert(editingId ? "✏️ Cliente actualizado" : "✅ Cliente guardado");
     } else {
       alert("❌ Hubo un problema al guardar.");
     }
   };
 
-  // Función para BORRAR
   const borrarCliente = async (id: string) => {
     const confirmacion = window.confirm("¿Estás seguro de que quieres borrar este cliente? Esta acción no se puede deshacer.");
     if (!confirmacion) return;
@@ -86,54 +80,74 @@ export default function ClientesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Mis Clientes</h2>
+    // 🔥 EL FONDO GRIS PREMIUM
+    <div className="min-h-[85vh] bg-slate-50 p-6 md:p-8 rounded-2xl">
+      
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-slate-800">Cartera de Clientes</h2>
         <button 
           onClick={abrirNuevoCliente}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-sm"
+          className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md"
         >
           + Nuevo Cliente
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+      {/* 🔥 LA CAJA FLOTANTE */}
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
         <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-800">
+          
+          {/* 🔥 LAS CABECERAS SAAS */}
+          <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
             <tr>
-              <th className="p-4 font-semibold">Nombre del Cliente</th>
-              <th className="p-4 font-semibold">CIF / NIF</th>
-              <th className="p-4 font-semibold">Teléfono</th>
-              <th className="p-4 font-semibold text-right">Acciones</th>
+              <th className="p-4">Nombre o Empresa</th>
+              <th className="p-4">CIF / NIF</th>
+              <th className="p-4">Teléfono</th>
+              <th className="p-4">Email</th>
+              <th className="p-4 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          
+          <tbody className="divide-y divide-slate-100">
             {clientes.length === 0 ? (
+              // 🔥 EL EMPTY STATE CHULO
               <tr>
-                <td colSpan={4} className="p-8 text-center text-slate-400">
-                  Todavía no tienes ningún cliente guardado. Haz clic en "Nuevo Cliente" para empezar.
+                <td colSpan={5} className="py-24 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="bg-blue-50 p-5 rounded-full shadow-inner mb-2">
+                      <svg className="w-12 h-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-800">Aún no tienes clientes</h3>
+                      <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                        Añade tu primer cliente haciendo clic en el botón superior para empezar a crear presupuestos.
+                      </p>
+                    </div>
+                  </div>
                 </td>
               </tr>
             ) : (
               clientes.map((cliente) => (
-                <tr key={cliente.id} className="transition hover:bg-slate-50">
+                <tr key={cliente.id} className="transition-colors hover:bg-slate-50/80">
                   <td className="p-4 font-medium text-slate-800">{cliente.name}</td>
-                  <td className="p-4">{cliente.cif || "—"}</td>
-                  <td className="p-4">{cliente.phone || "—"}</td>
-                  <td className="p-4 text-right space-x-3">
-                    {/* BOTÓN EDITAR */}
+                  <td className="p-4 text-slate-600">{cliente.cif || "—"}</td>
+                  <td className="p-4 text-slate-600">{cliente.phone || "—"}</td>
+                  <td className="p-4 text-slate-600">{cliente.email || "—"}</td>
+                  <td className="p-4 text-right space-x-4">
                     <button 
                       onClick={() => abrirEditarCliente(cliente)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                      className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors"
                     >
-                      Editar
+                      ✏️ Editar
                     </button>
-                    {/* BOTÓN BORRAR */}
                     <button 
                       onClick={() => borrarCliente(cliente.id)}
-                      className="text-sm font-medium text-red-500 hover:text-red-700"
+                      className="text-sm font-bold text-slate-400 hover:text-red-600 border-l pl-4 border-slate-200 transition-colors"
+                      title="Borrar cliente"
                     >
-                      Borrar
+                      🗑️
                     </button>
                   </td>
                 </tr>
@@ -143,52 +157,58 @@ export default function ClientesPage() {
         </table>
       </div>
 
+      {/* 🔥 EL MODAL REDISEÑADO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-800">
-                {editingId ? "Editar Cliente" : "Añadir Nuevo Cliente"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 className="text-xl font-bold text-slate-800">
+                {editingId ? "Editar Cliente" : "Nuevo Cliente"}
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-800">✕</button>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-xl font-bold">✕</button>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Nombre o Empresa *</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Nombre o Empresa *</label>
                 <input 
                   type="text" required value={name} onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:border-blue-500" 
+                  className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                  placeholder="Ej: Reformas Paco S.L."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">CIF / NIF</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">CIF / NIF</label>
                   <input 
                     type="text" value={cif} onChange={(e) => setCif(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:border-blue-500" 
+                    className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                    placeholder="B12345678"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">Teléfono</label>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">Teléfono</label>
                   <input 
                     type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:border-blue-500" 
+                    className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                    placeholder="600 000 000"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Email</label>
                 <input 
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:border-blue-500" 
+                  className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                  placeholder="contacto@empresa.com"
                 />
               </div>
-              <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
+              
+              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all">
                   {editingId ? "Actualizar Cliente" : "Guardar Cliente"}
                 </button>
               </div>
