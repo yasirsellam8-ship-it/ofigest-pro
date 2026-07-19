@@ -1,107 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
-model Company {
+// 👥 MODELO DE CLIENTES
+model Customer {
   id        String    @id @default(uuid())
   name      String
-  taxId     String    @unique
-  email     String
-  users     User[]
+  cif       String?
+  phone     String?
+  email     String?
+  quotes    Quote[]   // Relación: Un cliente puede tener varios presupuestos
+  invoices  Invoice[] // Relación: Un cliente puede tener varias facturas
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  quotes    Quote[]
-  invoices  Invoice[]
-  clients   Client[]  // Relación añadida para cerrar el círculo con Client
 }
 
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String?
-  role      String   @default("ADMIN")
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Client {
-  id        String   @id @default(uuid())
-  name      String
-  cif       String?  
-  email     String?
-  phone     String?
-  address   String?
-  companyId String   
-  company   Company  @relation(fields: [companyId], references: [id]) // ¡Descomentado!
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  quotes    Quote[]
-  invoices  Invoice[]
-}
-
+// 💼 MODELO DE PRESUPUESTOS
 model Quote {
-  id        String      @id @default(cuid())
-  name      String      // Ej: "Instalación Eléctrica Chalet"
-  subtotal  Float       @default(0)
-  taxAmount Float       @default(0) // Dinero de IVA
-  total     Float       @default(0) // Total a pagar
-  status    String      @default("PENDING")
+  id        String      @id @default(uuid())
+  name      String      // Título de la obra o proyecto
+  status    String      @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  subtotal  Float
+  taxAmount Float
+  total     Float
+  clientId  String
+  client    Customer    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items     QuoteItem[] // Relación: Las líneas de concepto del presupuesto
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-
-  clientId  String
-  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  items     QuoteItem[] // Relación hacia los conceptos
 }
 
-// NUEVO: Modelo para las líneas del presupuesto
+// 📦 LÍNEAS DE CONCEPTO DEL PRESUPUESTO
 model QuoteItem {
-  id        String   @id @default(cuid())
-  concept   String   // Ej: "Mano de obra", "Tubería PVC"
-  quantity  Float    @default(1)
-  price     Float    // Precio por unidad
-  taxRate   Float    @default(21) // Porcentaje de IVA aplicable
-  
+  id        String   @id @default(uuid())
+  concept   String
+  quantity  Float
+  price     Float
+  taxRate   Float
   quoteId   String
   quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }
 
+// 📄 MODELO DE FACTURAS
 model Invoice {
-  id        String        @id @default(cuid())
-  number    String        @unique // Ej: FAC-2026-001
-  subtotal  Float         @default(0)
-  taxAmount Float         @default(0)
-  total     Float         @default(0)
-  status    String        @default("UNPAID")
+  id        String        @id @default(uuid())
+  number    String        @unique // Número de factura (ej: FAC-2026-001)
+  status    String        @default("UNPAID") // PAID, UNPAID
+  subtotal  Float
+  taxAmount Float
+  total     Float
+  clientId  String
+  client    Customer      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items     InvoiceItem[] // Relación: Las líneas de concepto de la factura
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-
-  clientId  String
-  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  items     InvoiceItem[] // Relación hacia los conceptos
 }
 
-// NUEVO: Modelo para las líneas de la factura
+// 📦 LÍNEAS DE CONCEPTO DE LA FACTURA
 model InvoiceItem {
-  id        String   @id @default(cuid())
-  concept   String   
-  quantity  Float    @default(1)
-  price     Float    
-  taxRate   Float    @default(21) 
-  
+  id        String   @id @default(uuid())
+  concept   String
+  quantity  Float
+  price     Float
+  taxRate   Float
   invoiceId String
   invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }

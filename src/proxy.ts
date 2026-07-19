@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Comprobamos si existe nuestra cookie de acceso
   const isLoggedIn = request.cookies.has('ofigest_auth');
 

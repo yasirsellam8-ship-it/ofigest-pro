@@ -1,88 +1,72 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
+// Iniciamos la conexión con la base de datos
 const prisma = new PrismaClient();
 
-// 1. GUARDAR (POST)
+// 🟢 OBTENER TODOS LOS CLIENTES (Para llenar la tabla)
+export async function GET() {
+  try {
+    const customers = await prisma.customer.findMany({
+      orderBy: { createdAt: "desc" }, // Los más nuevos primero
+    });
+    return NextResponse.json(customers);
+  } catch (error) {
+    // Si falla, ahora SÍ lo imprimirá en rojo en tu terminal
+    console.error("❌ Error en GET /api/customers:", error);
+    return NextResponse.json({ error: "Error al obtener los clientes" }, { status: 500 });
+  }
+}
+
+// 🔵 CREAR UN NUEVO CLIENTE (Botón + Nuevo Cliente)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, cif, phone, email } = body;
-
-    if (!name) return NextResponse.json({ error: 'El nombre es obligatorio' }, { status: 400 });
-
-    // 👇 LA MAGIA: Le decimos a la BBDD que cree la empresa si no existe
-    await prisma.company.upsert({
-      where: { id: 'mi-empresa-123' },
-      update: {}, // Si ya existe, no hace nada
-      create: {
-        id: 'mi-empresa-123',
-        name: 'Instalaciones de Prueba',
-        taxId: 'B00000000', // Obligatorio según tu schema
-        email: 'admin@prueba.com'
-      }
-    });
-
-    // Ahora sí, guardamos al cliente atándolo a la empresa que ya existe
-    const newClient = await prisma.client.create({
+    const newCustomer = await prisma.customer.create({
       data: {
-        name,
-        cif: cif || null,
-        phone: phone || null,
-        email: email || null,
-        companyId: 'mi-empresa-123', 
-      }
+        name: body.name,
+        cif: body.cif || null,
+        phone: body.phone || null,
+        email: body.email || null,
+      },
     });
-
-    return NextResponse.json(newClient, { status: 201 });
-  } catch (error: any) {
-    console.error("🔥 EL ERROR REAL DE LA BBDD ES:", error);
-    return NextResponse.json({ error: 'Error al crear', detalle: error.message }, { status: 500 });
+    return NextResponse.json(newCustomer);
+  } catch (error) {
+    console.error("❌ Error en POST /api/customers:", error);
+    return NextResponse.json({ error: "Error al crear el cliente" }, { status: 500 });
   }
 }
 
-// 2. LEER (GET)
-export async function GET() {
-  try {
-    const clients = await prisma.client.findMany({
-      where: { companyId: 'mi-empresa-123' },
-      orderBy: { createdAt: 'desc' } 
-    });
-    return NextResponse.json(clients, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Error al leer' }, { status: 500 });
-  }
-}
-
-// 3. ACTUALIZAR/EDITAR (PUT)
+// 🟠 ACTUALIZAR UN CLIENTE (Botón Editar)
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, name, cif, phone, email } = body;
-
-    const updatedClient = await prisma.client.update({
-      where: { id: id },
-      data: { name, cif, phone, email }
+    const updatedCustomer = await prisma.customer.update({
+      where: { id: body.id },
+      data: {
+        name: body.name,
+        cif: body.cif || null,
+        phone: body.phone || null,
+        email: body.email || null,
+      },
     });
-
-    return NextResponse.json(updatedClient, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Error al actualizar' }, { status: 500 });
+    return NextResponse.json(updatedCustomer);
+  } catch (error) {
+    console.error("❌ Error en PUT /api/customers:", error);
+    return NextResponse.json({ error: "Error al actualizar el cliente" }, { status: 500 });
   }
 }
 
-// 4. BORRAR (DELETE)
+// 🔴 BORRAR UN CLIENTE (Botón Borrar)
 export async function DELETE(request: Request) {
   try {
     const body = await request.json();
-    const { id } = body;
-
-    await prisma.client.delete({
-      where: { id: id }
+    await prisma.customer.delete({
+      where: { id: body.id },
     });
-
-    return NextResponse.json({ mensaje: 'Cliente borrado correctamente' }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Error al borrar' }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error en DELETE /api/customers:", error);
+    return NextResponse.json({ error: "Error al borrar el cliente" }, { status: 500 });
   }
 }

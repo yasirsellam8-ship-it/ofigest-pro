@@ -1,12 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: any = {
-  eslint: {
-    // Esto apaga el inspector de código estricto en Vercel
-    ignoreDuringBuilds: true,
-  },
   typescript: {
-    // Esto ignora los avisos de tipos en Vercel
+    // Esto ignora los avisos de tipos en Vercel para subir rápido
     ignoreBuildErrors: true,
   },
 };

@@ -1,95 +1,89 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
+// Iniciamos la conexión con la base de datos
 const prisma = new PrismaClient();
 
+// 🟢 GET: OBTENER TODAS LAS FACTURAS
 export async function GET() {
   try {
     const invoices = await prisma.invoice.findMany({
+      include: {
+        client: true, // Traemos los datos del cliente
+        items: true,  // Traemos las líneas de concepto para el PDF
+      },
       orderBy: { createdAt: "desc" },
-      include: { client: true }, 
     });
     return NextResponse.json(invoices);
   } catch (error) {
-    return NextResponse.json({ error: "Error al cargar facturas" }, { status: 500 });
+    console.error("❌ Error en GET /api/invoices:", error);
+    return NextResponse.json({ error: "Error al obtener las facturas" }, { status: 500 });
   }
 }
 
+// 🔵 POST: CREAR UNA NUEVA FACTURA
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { number, clientId, items, subtotal, taxAmount, total } = body;
-
-    let company = await prisma.company.findFirst();
-    if (!company) {
-      company = await prisma.company.create({
-        data: { name: "Mi Empresa Instaladora", taxId: "B12345678", email: "info@miempresa.com" }
-      });
-    }
-
+    
     const newInvoice = await prisma.invoice.create({
       data: {
-        number,
-        clientId,
-        companyId: company.id,
-        subtotal,
-        taxAmount,
-        total,
+        number: body.number,
+        clientId: body.clientId,
+        subtotal: body.subtotal,
+        taxAmount: body.taxAmount,
+        total: body.total,
+        // Magia de Prisma: Creamos las líneas vinculadas en la misma operación
         items: {
-          create: items.map((item: any) => ({
+          create: body.items.map((item: any) => ({
             concept: item.concept,
             quantity: item.quantity,
             price: item.price,
-            taxRate: item.taxRate
-          }))
-        }
-      }
+            taxRate: item.taxRate,
+          })),
+        },
+      },
     });
-
-    return NextResponse.json(newInvoice, { status: 201 });
+    return NextResponse.json(newInvoice);
   } catch (error) {
-    return NextResponse.json({ error: "Error al guardar la factura" }, { status: 500 });
+    console.error("❌ Error en POST /api/invoices:", error);
+    return NextResponse.json({ error: "Error al crear la factura" }, { status: 500 });
   }
 }
 
+// 🟠 PATCH: ACTUALIZAR ESTADO DE LA FACTURA (Pagada / Pendiente)
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { id, status } = body; 
-
     const updatedInvoice = await prisma.invoice.update({
-      where: { id },
-      data: { status }
+      where: { id: body.id },
+      data: { status: body.status },
     });
-
     return NextResponse.json(updatedInvoice);
   } catch (error) {
-    return NextResponse.json({ error: "Error al cambiar el estado" }, { status: 500 });
+    console.error("❌ Error en PATCH /api/invoices:", error);
+    return NextResponse.json({ error: "Error al actualizar el estado" }, { status: 500 });
   }
 }
 
-// NUEVO: Método DELETE para borrar la factura
+// 🔴 DELETE: BORRAR UNA FACTURA
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Falta el ID" }, { status: 400 });
+      return NextResponse.json({ error: "Falta el ID de la factura" }, { status: 400 });
     }
 
-    // Borramos los conceptos de la factura primero (por seguridad)
-    await prisma.invoiceItem.deleteMany({
-      where: { invoiceId: id }
-    });
-
-    // Borramos la factura
     await prisma.invoice.delete({
-      where: { id }
+      where: { id: id },
     });
-
-    return NextResponse.json({ message: "Factura borrada correctamente" });
+    return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("❌ Error en DELETE /api/invoices:", error);
     return NextResponse.json({ error: "Error al borrar la factura" }, { status: 500 });
   }
 }
