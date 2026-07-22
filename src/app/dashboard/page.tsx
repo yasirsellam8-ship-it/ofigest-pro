@@ -1,7 +1,28 @@
-"use client";
+export const dynamic = "force-dynamic";
 
-export default function DashboardInicio() {
-  // Simulamos unos datos rápidos para que veas el diseño vivo
+import { PrismaClient } from "@prisma/client";
+
+// Conectamos la base de datos
+const prisma = new PrismaClient();
+
+export default async function DashboardInicio() {
+  // --- MAGIA DE PRISMA: OBTENEMOS LOS DATOS REALES ---
+  
+  // 1. Contamos los clientes
+  const totalClientes = await prisma.customer.count();
+
+  // 2. Contamos los presupuestos
+  const totalPresupuestos = await prisma.quote.count();
+
+  // 3. Sumamos la facturación total
+  const sumaFacturas = await prisma.invoice.aggregate({
+    _sum: {
+      total: true,
+    },
+  });
+  const facturacionTotal = sumaFacturas._sum.total || 0;
+
+  // Fecha de hoy
   const fechaHoy = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
@@ -33,11 +54,11 @@ export default function DashboardInicio() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Facturación Total</p>
           <div className="flex items-baseline gap-1">
-            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">281.93</h2>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">{facturacionTotal.toFixed(2)}</h2>
             <span className="text-2xl font-bold text-slate-400">€</span>
           </div>
           <div className="mt-4 flex items-center text-xs font-bold text-emerald-700 bg-emerald-100/80 w-fit px-3 py-1.5 rounded-lg border border-emerald-200">
-            <span className="mr-1">↑</span> +12% este mes
+            <span className="mr-1">↑</span> En tiempo real
           </div>
         </div>
 
@@ -50,10 +71,10 @@ export default function DashboardInicio() {
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Cartera de Clientes</p>
           <div className="flex items-baseline gap-1">
-            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">2</h2>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">{totalClientes}</h2>
           </div>
           <div className="mt-4 flex items-center text-xs font-bold text-blue-700 bg-blue-100/80 w-fit px-3 py-1.5 rounded-lg border border-blue-200">
-            Nuevos contactos listos
+            Sincronizado
           </div>
         </div>
 
@@ -64,12 +85,12 @@ export default function DashboardInicio() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Presupuestos Pendientes</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Presupuestos Emitidos</p>
           <div className="flex items-baseline gap-1">
-            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">0</h2>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tighter">{totalPresupuestos}</h2>
           </div>
           <div className="mt-4 flex items-center text-xs font-bold text-amber-700 bg-amber-100/80 w-fit px-3 py-1.5 rounded-lg border border-amber-200">
-            Todo al día
+            Base de datos activa
           </div>
         </div>
 
