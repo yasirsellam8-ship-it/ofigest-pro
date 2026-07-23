@@ -93,11 +93,12 @@ export default function ClientesPage() {
         </button>
       </div>
 
-      {/* 🔥 LA CAJA FLOTANTE */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
-        <table className="w-full text-left text-sm text-slate-600">
+      {/* 🔥 LA CAJA FLOTANTE (Ahora con scroll horizontal adaptado) */}
+      <div className="overflow-x-auto w-full rounded-xl border border-slate-200 bg-white shadow-md">
+        
+        {/* 🔥 LA TABLA (Con ancho mínimo para forzar el scroll en móviles) */}
+        <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
           
-          {/* 🔥 LAS CABECERAS SAAS */}
           <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
             <tr>
               <th className="p-4">Nombre o Empresa</th>
@@ -110,7 +111,6 @@ export default function ClientesPage() {
           
           <tbody className="divide-y divide-slate-100">
             {clientes.length === 0 ? (
-              // 🔥 EL EMPTY STATE CHULO
               <tr>
                 <td colSpan={5} className="py-24 text-center">
                   <div className="flex flex-col items-center justify-center space-y-4">
@@ -160,7 +160,7 @@ export default function ClientesPage() {
       {/* 🔥 EL MODAL REDISEÑADO */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 md:p-8 shadow-2xl">
             <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
               <h3 className="text-xl font-bold text-slate-800">
                 {editingId ? "Editar Cliente" : "Nuevo Cliente"}
@@ -177,7 +177,9 @@ export default function ClientesPage() {
                   placeholder="Ej: Reformas Paco S.L."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-5">
+              
+              {/* 🔥 Adaptamos a 1 columna en móvil y 2 en escritorio */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700">CIF / NIF</label>
                   <input 
@@ -195,6 +197,7 @@ export default function ClientesPage() {
                   />
                 </div>
               </div>
+              
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">Email</label>
                 <input 
