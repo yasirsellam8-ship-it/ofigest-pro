@@ -125,15 +125,17 @@ export default function PresupuestosPage() {
     <>
       <div className="print:hidden min-h-[85vh] bg-slate-50 p-6 md:p-8 rounded-2xl">
         
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <h2 className="text-2xl font-bold text-slate-800">Gestión de Presupuestos</h2>
-          <button onClick={abrirNuevoPresupuesto} className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md">
+          <button onClick={abrirNuevoPresupuesto} className="w-full md:w-auto rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all hover:shadow-md">
             + Nuevo Presupuesto
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md">
-          <table className="w-full text-left text-sm text-slate-600">
+        {/* 🔥 LA CAJA FLOTANTE (Con scroll horizontal para móviles) */}
+        <div className="overflow-x-auto w-full rounded-xl border border-slate-200 bg-white shadow-md">
+          {/* 🔥 ANCHO MÍNIMO para que las columnas no se aplasten */}
+          <table className="w-full text-left text-sm text-slate-600 min-w-[900px]">
             <thead className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
               <tr>
                 <th className="p-4">Título del Proyecto</th>
@@ -203,15 +205,16 @@ export default function PresupuestosPage() {
         </div>
 
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-2 md:p-4 backdrop-blur-sm">
+            <div className="w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl bg-white p-6 md:p-8 shadow-2xl">
               <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
                 <h3 className="text-xl font-bold text-slate-800">Crear Presupuesto</h3>
                 <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-xl font-bold">✕</button>
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                {/* 🔥 Adaptamos el título y cliente al móvil (1 columna) y ordenador (2 columnas) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="mb-1.5 block text-sm font-semibold text-slate-700">Título del proyecto *</label>
                     <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="Ej: Reforma cocina" />
@@ -233,30 +236,40 @@ export default function PresupuestosPage() {
 
                   <div className="space-y-3">
                     {items.map((item, index) => (
-                      <div key={index} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <input type="text" placeholder="Concepto del trabajo" required value={item.concept} onChange={(e) => actualizarLinea(index, 'concept', e.target.value)} className="flex-1 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" />
-                        <input type="number" min="0.1" step="0.1" required value={item.quantity} onChange={(e) => actualizarLinea(index, 'quantity', parseFloat(e.target.value) || 0)} className="w-24 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Cantidad" />
-                        <input type="number" min="0" step="0.01" required value={item.price} onChange={(e) => actualizarLinea(index, 'price', parseFloat(e.target.value) || 0)} className="w-32 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Precio Ud." />
-                        <select value={item.taxRate} onChange={(e) => actualizarLinea(index, 'taxRate', parseFloat(e.target.value))} className="w-24 rounded-lg border border-slate-300 p-2 text-sm bg-white focus:border-blue-500 outline-none">
-                          <option value="21">21% IVA</option><option value="10">10% IVA</option><option value="0">0% IVA</option>
-                        </select>
-                        {items.length > 1 && <button type="button" onClick={() => quitarLinea(index)} className="text-red-400 hover:text-red-600 font-bold px-2 transition-colors">✕</button>}
+                      // 🔥 MAGIA RESPONSIVE: En móvil se apilan, en ordenador se ponen en fila
+                      <div key={index} className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <input type="text" placeholder="Concepto del trabajo" required value={item.concept} onChange={(e) => actualizarLinea(index, 'concept', e.target.value)} className="w-full md:flex-1 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" />
+                        
+                        <div className="flex w-full md:w-auto gap-2 items-center">
+                          <input type="number" min="0.1" step="0.1" required value={item.quantity} onChange={(e) => actualizarLinea(index, 'quantity', parseFloat(e.target.value) || 0)} className="w-full md:w-20 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Cantidad" placeholder="Cant." />
+                          <input type="number" min="0" step="0.01" required value={item.price} onChange={(e) => actualizarLinea(index, 'price', parseFloat(e.target.value) || 0)} className="w-full md:w-28 rounded-lg border border-slate-300 p-2 text-sm focus:border-blue-500 outline-none" title="Precio Ud." placeholder="Precio" />
+                          <select value={item.taxRate} onChange={(e) => actualizarLinea(index, 'taxRate', parseFloat(e.target.value))} className="w-full md:w-24 rounded-lg border border-slate-300 p-2 text-sm bg-white focus:border-blue-500 outline-none">
+                            <option value="21">21% IVA</option><option value="10">10% IVA</option><option value="0">0% IVA</option>
+                          </select>
+                          
+                          {items.length > 1 ? (
+                            <button type="button" onClick={() => quitarLinea(index)} className="text-red-400 hover:text-red-600 font-bold px-2 transition-colors">✕</button>
+                          ) : (
+                            <div className="w-6 px-2"></div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="flex justify-end border-t border-slate-100 pt-6">
-                  <div className="w-72 space-y-3 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  {/* 🔥 El total ahora ocupa todo el ancho en el móvil para que se vea bien claro */}
+                  <div className="w-full md:w-72 space-y-3 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <div className="flex justify-between text-slate-600"><span>Base Imponible:</span><span className="font-medium">{subtotal.toFixed(2)} €</span></div>
                     <div className="flex justify-between text-slate-600"><span>Impuestos (IVA):</span><span className="font-medium">{taxAmount.toFixed(2)} €</span></div>
                     <div className="flex justify-between text-lg font-black text-slate-800 border-t border-slate-200 pt-3 mt-1"><span>TOTAL:</span><span>{total.toFixed(2)} €</span></div>
                   </div>
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-100">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-lg px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">Cancelar</button>
-                  <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all">Guardar Presupuesto</button>
+                <div className="mt-8 flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-slate-100">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-full md:w-auto rounded-lg px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors order-2 md:order-1">Cancelar</button>
+                  <button type="submit" className="w-full md:w-auto rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700 shadow-md transition-all order-1 md:order-2">Guardar Presupuesto</button>
                 </div>
               </form>
             </div>
